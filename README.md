@@ -1,41 +1,128 @@
-# reply-typography (字体设置)
+# 字体设置 reply-typography
 
-Typography & reading-flow plugin for the DSH Web GUI. A sidebar-foot **字体设置**
-(font settings) button opens a novel-reader style popup to tune the **AI reply
-body** and the **left sidebar**: font size, line height, letter spacing,
-paragraph gap, typeface — with live preview, per-target profiles, and
-localStorage persistence.
+> DSH Web GUI 的阅读排版外挂插件：字号行距随心调，简洁模式自动折叠工具与思考——回复过程看得见，结论一直找得到。
 
-A built-in **concise mode** (on by default) keeps the whole reply process
-visible while it streams, then automatically folds tool calls and reasoning
-the moment the turn settles — leaving only each turn's final answer.
+![字体设置弹窗](docs/screenshot-popup.png)
 
-Spacing sliders (paragraph gap / tool-row gap) are **ratio-based**: one step
-scales every element family (paragraphs, lists, headings, tool rows,
-sub-call stacks) from its own stock spacing, so the whole reply tightens or
-loosens evenly.
+**简洁模式**：回复进行时工具卡片与思考过程全部完整可见（下图左，箭头处即侧栏底部的「字体设置」入口）；回合结束瞬间自动折叠，只保留每轮最终回答（下图右，弹窗中「简洁模式」为开启状态）。
 
-See [README.zh.md](./README.zh.md) for the full (Chinese) documentation.
+| 回复过程完整可见 | 回复完成后自动折叠 |
+|---|---|
+| ![回复过程完整可见](docs/screenshot-process.png) | ![简洁模式折叠后](docs/screenshot-fold.png) |
 
-## How it works
+English: [README.en.md](./README.en.md)
 
-- Size / line-height / family ride the theme override layer (`theme.overrideTokens`)
-  over the `--dsw-font-markdown-*` token family; product stylesheets keep their defaults.
-- Letter/paragraph/tool-row spacing flow through custom properties consumed by an
-  owned static stylesheet (`calc(stock × ratio)` per element family); everything is
-  removed exactly on dispose.
-- Concise mode: the chat flow is a flat list of typed nodes; fold rules require a
-  later `turn-tail` sibling, so the active turn stays fully visible and folds the
-  instant it settles. A single document-wide MutationObserver with
-  requestAnimationFrame coalescing and result caching keeps steady-state streaming
-  at two small queries per frame with zero DOM writes.
-- The sidebar column is hooked via `data-pane="sidebar"`, stamped by the plugin's
-  own idempotent shim — no web-ui-all dependency.
+## 为什么做这个插件
 
-## Install
+- **过程刷屏，结论难找。** 智能体一次回复往往带着十几个工具卡片和一长串思考，真正要看的答案被顶得无影无踪，官方界面又没有「折叠过程」的开关，每次都要手动来回滚动。简洁模式把「过程」和「结论」分开：回复进行时全程可见（实时进度一点不丢），回合一结束立即自动折叠，只留最终回答和你发送的消息。
+- **排版硬编码，不合阅读习惯。** 正文字号、行距、段距、字体全部写死在产品里，长回复读起来费劲；有人喜欢大字号宽行距，有人喜欢紧凑密排，官方没有暴露任何入口。本插件把官方默认值做成滑杆中点，向两边对称可调，随时一键恢复默认。
+- **间距滑杆「牵一发而动一身」的通病。** 常见做法是把某个 margin 改成固定 px——结果段落压扁了、列表和标题纹丝不动，越调越乱。本插件的段距/工具行距是**等比滑杆**：段落、列表、标题、工具行各自按**自己的官方间距**同步缩放，整体均匀收紧或放松，不会出现局部挤压。
+- **回复区和侧栏需求不同，却只能共用一套样式。** 本插件两个目标各自记忆一套参数，底部一键切换。
+
+## 功能
+
+| | 回复（AI 正文） | 左侧边栏 |
+|---|---|---|
+| 字号 | 6–26px（官方 16px 居中） | 6–22px（官方 14px 居中） |
+| 小字字号 | 6–22px（官方 14px 居中，控制「Think」思考块与工具卡片小字/行首图标） | — |
+| 行距 | 0.50–3.00x（官方 1.75x 居中） | 0.50–2.90x（官方 1.70x 居中） |
+| 字距 | -6 – 6px（标准居中） | 同左 |
+| 段距 | ×0.00 – ×3.00 等比（×1.00 = 官方） | — |
+| 工具行距 | ×0.00 – ×2.00 等比（×1.00 = 官方） | — |
+| 字体 | 系统默认 / 微软雅黑 / 思源黑体 / 思源宋体 / 宋体 / 楷体 / 苹方 | 同左 |
+
+> 所有滑杆以**官方原生值**为中点对称可调——缩小与放大的空间对等，「恢复默认」即回到中点。**段距与工具行距是等比滑杆**：一格之内，段落、列表、标题、hr/引用/代码块、工具行、子调用栈各自按**自己的官方间距**同步伸缩（官方间距逐项取自实际下发的产品样式），不会出现"段落压扁了、列表纹丝不动"的局部挤压。用户发送的气泡消息也跟随「字号」与「行距」；思考块小字的行距/字距跟随回复比例。
+
+### 简洁模式
+
+- **默认开启**，弹窗内一键关闭；
+- 回复进行中：工具卡片、思考过程、中间叙述**全部完整可见**，实时进度不遮挡；
+- 回合结束瞬间自动折叠以上过程，**只保留每轮最终回答**与你发送的消息；
+- 模型重试、上下文压缩等中间事件按"回合中"处理，不会被误当成最终回答保留。
+
+### 其它特性
+
+- 弹窗底部「作用于」切换目标，**两个目标各自记一套参数**；
+- 预览框随目标切换（回复模式显示正文+思考小字样例，侧栏模式显示侧栏文字样例）；
+- 「恢复默认」只重置当前选中的目标；
+- 设置存 localStorage（键 `reply-typography.v2`，自动迁移旧键），跨会话记忆；
+- 弹窗不透明实色配色，跟随系统明暗主题，Esc 关闭；字体下拉为自绘圆角菜单，portal 渲染不被容器裁剪，空间不足自动向上弹开；标题栏可拖拽移动位置，双击复位；
+- **自带侧栏列标记 shim**（给核心布局的侧边栏列打 `data-pane="sidebar"` 标记），无需 web-ui-all 也能适配左侧边栏——桌面版 / 纯 Web 版（`dsh web`）均可使用。
+
+## 安装
+
+### 前置要求
+
+- DSH Desktop 2.0.x（自带 `theme` 客户端服务与 `sidebar.footer.action` / `shell.overlay` 插槽）；
+- pnpm（DSH 自带环境即可）。
+
+### 方式一：git 仓库直装（推荐）
+
+在 profile 目录里把本仓库加为依赖：
 
 ```bash
-pnpm --dir <profile dir> add github:linchenlan/reply-typography
+pnpm --dir <profile 目录> add github:linchenlan/reply-typography
+```
+
+`<profile 目录>` 说明：桌面版默认是 `%USERPROFILE%\.dsh\profiles\desktop`；纯 Web 版（`dsh web`）是 `profiles\web`。执行后 pnpm 会把 `reply-typography` 写入该 profile 的 package.json 依赖。
+
+### 方式二：本地开发链接（想改代码调试用）
+
+```bash
+git clone https://github.com/linchenlan/reply-typography.git
+cd reply-typography
+pnpm install
+pnpm --dir <profile 目录> add file:<本仓库绝对路径>
+```
+
+`file:` 链接的好处：之后改 `lib/client.js` 重启 DSH 即生效，不用重新发版。
+
+### 注册 bundle patch
+
+在 profile 目录的 `cordis.patch.yml` 末尾追加（已有则跳过）：
+
+```yaml
+- insert:
+    - id: reply-typography
+      name: 'reply-typography'
+```
+
+### 启用与验证
+
+1. 重启 DSH（或重启对应 profile 实例）；
+2. 打开「设置 → 插件管理」，确认列表出现 `reply-typography`；
+3. 侧栏底部出现「字体设置」按钮、点击能弹出设置窗，即安装成功。
+
+> 多 profile 实例（如同时开 desktop 与 web）：每个 profile 需各自添加依赖与 insert 行。
+
+## 使用
+
+- **打开设置**：点侧栏底部「字体设置」；弹窗标题栏可拖动移动位置，双击标题栏复位，Esc 或右上角 × 关闭；
+- **选目标**：弹窗底部「作用于」切换「回复 / 左侧边栏」，滑杆只调当前目标，两套参数互不影响；
+- **调参**：字号 / 小字字号 / 行距 / 字距 / 段距 / 工具行距 / 字体，顶部预览框实时反映效果；「恢复默认」只重置当前目标；
+- **段距、工具行距怎么调**：显示的是倍率，×1.00 = 官方默认；想整体更紧凑拉到 ×0.6–×0.8，想更疏朗拉到 ×1.2–×1.5，段落/列表/标题/工具行会一起均匀变化；
+- **简洁模式**：默认开启，弹窗内「简洁模式」按钮随时开/关；关掉后恢复官方原样（过程永久展开）；
+- **记忆**：所有参数存 localStorage，重启浏览器/DSH 后保持。
+
+## 实现原理
+
+- **字号/行距/字体**走主题令牌覆盖层：`theme.overrideTokens("reply-typography", …)` 覆盖 `--dsw-font-markdown-*` 系列（正文四态 + h1–h4 家族替换），产品样式表保持默认值，插件卸载即精确还原；
+- **字距/段距/工具行距**没有现成令牌，通过同一覆盖层下发自定义变量（`--reply-typography-letter-spacing` / `--rt-gap` / `--rt-row-scale`），由插件自持的一条静态样式表消费——段距与工具行距以 `calc(官方间距 × 倍率)` 作用于每一类元素；
+- **简洁模式**：聊天流是 `[data-chat-flow]` 下的扁平节点列表（tool-call / tool-result / reasoning / assistant-step / turn-tail …）。折叠样式要求每个过程节点之后存在 turn-tail 兄弟节点——进行中的回合没有 turn-tail，因此全程可见；回合落定瞬间整体折叠。一个观察器为每个已落定回合的最后一条 assistant-step 打 `data-rt-final` 标记，折叠后只放行最终回答；
+- **性能**：单一全文档 MutationObserver + requestAnimationFrame 帧级合并扫描；侧栏标记与折叠标记两处扫描均带结果缓存，流式输出期间每帧只有两次小查询、零 DOM 写入；
+- **侧边栏**挂在 `data-pane="sidebar"` 锚点上注入字号/行距/字距/字体；该标记由插件自带 shim 打到核心布局的侧栏列（幂等，可与其它列 shim 共存），因此不依赖 web-ui-all；
+- 明暗主题跟随 `theme/change` 事件快照。
+
+## 仓库结构
+
+```
+reply-typography/
+├── package.json          # dsh.client 声明（platform web, inject runtime）
+├── cordis.patch.yml      # bundle patch：insert 行 reply-typography
+├── docs/                 # 截图
+└── lib/
+    ├── index.js          # Host 半（占位，无宿主逻辑）
+    └── client.js         # Client 半（__ModuleLoader__ 工厂格式打包产物）
 ```
 
 ## License
