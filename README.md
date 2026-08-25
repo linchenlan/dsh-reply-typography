@@ -1,4 +1,4 @@
-# 字体设置 reply-typography
+# 字体设置 dsh-reply-typography
 
 > DSH Web GUI 的阅读排版外挂插件：字号行距随心调，简洁模式自动折叠工具与思考——回复过程看得见，结论一直找得到。
 
@@ -61,16 +61,16 @@ English: [README.en.md](./README.en.md)
 在 profile 目录里把本仓库加为依赖：
 
 ```bash
-pnpm --dir <profile 目录> add github:linchenlan/reply-typography
+pnpm --dir <profile 目录> add github:linchenlan/dsh-reply-typography
 ```
 
-`<profile 目录>` 说明：桌面版默认是 `%USERPROFILE%\.dsh\profiles\desktop`；纯 Web 版（`dsh web`）是 `profiles\web`。执行后 pnpm 会把 `reply-typography` 写入该 profile 的 package.json 依赖。
+`<profile 目录>` 说明：桌面版默认是 `%USERPROFILE%\.dsh\profiles\desktop`；纯 Web 版（`dsh web`）是 `profiles\web`。执行后 pnpm 会把 `dsh-reply-typography` 写入该 profile 的 package.json 依赖。
 
 ### 方式二：本地开发链接（想改代码调试用）
 
 ```bash
-git clone https://github.com/linchenlan/reply-typography.git
-cd reply-typography
+git clone https://github.com/linchenlan/dsh-reply-typography.git
+cd dsh-reply-typography
 pnpm install
 pnpm --dir <profile 目录> add file:<本仓库绝对路径>
 ```
@@ -83,14 +83,14 @@ pnpm --dir <profile 目录> add file:<本仓库绝对路径>
 
 ```yaml
 - insert:
-    - id: reply-typography
-      name: 'reply-typography'
+    - id: dsh-reply-typography
+      name: 'dsh-reply-typography'
 ```
 
 ### 启用与验证
 
 1. 重启 DSH（或重启对应 profile 实例）；
-2. 打开「设置 → 插件管理」，确认列表出现 `reply-typography`；
+2. 打开「设置 → 插件管理」，确认列表出现 `dsh-reply-typography`；
 3. 侧栏底部出现「字体设置」按钮、点击能弹出设置窗，即安装成功。
 
 > 多 profile 实例（如同时开 desktop 与 web）：每个 profile 需各自添加依赖与 insert 行。
@@ -106,7 +106,7 @@ pnpm --dir <profile 目录> add file:<本仓库绝对路径>
 
 ## 实现原理
 
-- **字号/行距/字体**走主题令牌覆盖层：`theme.overrideTokens("reply-typography", …)` 覆盖 `--dsw-font-markdown-*` 系列（正文四态 + h1–h4 家族替换），产品样式表保持默认值，插件卸载即精确还原；
+- **字号/行距/字体**走主题令牌覆盖层：`theme.overrideTokens("dsh-reply-typography", …)` 覆盖 `--dsw-font-markdown-*` 系列（正文四态 + h1–h4 家族替换），产品样式表保持默认值，插件卸载即精确还原；
 - **字距/段距/工具行距**没有现成令牌，通过同一覆盖层下发自定义变量（`--reply-typography-letter-spacing` / `--rt-gap` / `--rt-row-scale`），由插件自持的一条静态样式表消费——段距与工具行距以 `calc(官方间距 × 倍率)` 作用于每一类元素；
 - **简洁模式**：聊天流是 `[data-chat-flow]` 下的扁平节点列表（tool-call / tool-result / reasoning / assistant-step / turn-tail …）。折叠样式要求每个过程节点之后存在 turn-tail 兄弟节点——进行中的回合没有 turn-tail，因此全程可见；回合落定瞬间整体折叠。一个观察器为每个已落定回合的最后一条 assistant-step 打 `data-rt-final` 标记，折叠后只放行最终回答；
 - **性能**：单一全文档 MutationObserver + requestAnimationFrame 帧级合并扫描；侧栏标记与折叠标记两处扫描均带结果缓存，流式输出期间每帧只有两次小查询、零 DOM 写入；
@@ -116,9 +116,9 @@ pnpm --dir <profile 目录> add file:<本仓库绝对路径>
 ## 仓库结构
 
 ```
-reply-typography/
+dsh-reply-typography/
 ├── package.json          # dsh.client 声明（platform web, inject runtime）
-├── cordis.patch.yml      # bundle patch：insert 行 reply-typography
+├── cordis.patch.yml      # bundle patch：insert 行 dsh-reply-typography
 ├── docs/                 # 截图
 └── lib/
     ├── index.js          # Host 半（占位，无宿主逻辑）

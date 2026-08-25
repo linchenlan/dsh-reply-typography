@@ -1,4 +1,4 @@
-# reply-typography bundle patch
+# dsh-reply-typography bundle patch
 - insert:
-    - id: reply-typography
-      name: 'reply-typography'
+    - id: dsh-reply-typography
+      name: 'dsh-reply-typography'

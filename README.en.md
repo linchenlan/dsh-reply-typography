@@ -1,4 +1,4 @@
-# reply-typography (字体设置)
+# dsh-reply-typography (字体设置)
 
 Typography & reading-flow plugin for the DSH Web GUI. A sidebar-foot **字体设置**
 (font settings) button opens a novel-reader style popup to tune the **AI reply
@@ -41,7 +41,7 @@ See [README.md](./README.md) for the full documentation (Chinese).
 ## Install
 
 ```bash
-pnpm --dir <profile dir> add github:linchenlan/reply-typography
+pnpm --dir <profile dir> add github:linchenlan/dsh-reply-typography
 ```
 
 ## License
