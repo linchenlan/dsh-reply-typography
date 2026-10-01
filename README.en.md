@@ -1,20 +1,16 @@
 # dsh-reply-typography (字体设置)
 
-Typography & reading-flow plugin for the DSH Web GUI. A sidebar-foot **字体设置**
-(font settings) button opens a novel-reader style popup to tune the **AI reply
-body** and the **left sidebar**: font size, line height, letter spacing,
-paragraph gap, typeface — with live preview, per-target profiles, and
+Typography plugin for the DSH Web GUI. A sidebar-foot **字体设置** (font settings)
+button opens a novel-reader style popup to tune the **AI reply body** and the
+**left sidebar**: font size, line height, letter spacing, paragraph gap, tool-row
+gap, reasoning-row gap, typeface — with live preview, per-target profiles, and
 localStorage persistence.
-
-A built-in **concise mode** (on by default) keeps the whole reply process
-visible while it streams, then automatically folds tool calls and reasoning
-the moment the turn settles — leaving only each turn's final answer.
 
 ![Font settings popup](docs/screenshot-popup.png)
 
-| Process fully visible | Auto-folded after the turn settles |
-|---|---|
-| ![Process visible](docs/screenshot-process.png) | ![Folded](docs/screenshot-fold.png) |
+The sidebar-foot entry (arrow):
+
+![Sidebar entry](docs/screenshot-process.png)
 
 Spacing sliders (paragraph gap / tool-row gap) are **ratio-based**: one step
 scales every element family (paragraphs, lists, headings, tool rows,
@@ -27,14 +23,12 @@ See [README.md](./README.md) for the full documentation (Chinese).
 
 - Size / line-height / family ride the theme override layer (`theme.overrideTokens`)
   over the `--dsw-font-markdown-*` token family; product stylesheets keep their defaults.
-- Letter/paragraph/tool-row spacing flow through custom properties consumed by an
-  owned static stylesheet (`calc(stock × ratio)` per element family); everything is
-  removed exactly on dispose.
-- Concise mode: the chat flow is a flat list of typed nodes; fold rules require a
-  later `turn-tail` sibling, so the active turn stays fully visible and folds the
-  instant it settles. A single document-wide MutationObserver with
-  requestAnimationFrame coalescing and result caching keeps steady-state streaming
-  at two small queries per frame with zero DOM writes.
+- Letter/paragraph/tool-row/reasoning-row spacing flow through custom properties
+  (`--rt-gap` / `--rt-row-scale` / `--rt-think-gap`) consumed by an owned static
+  stylesheet; everything is removed exactly on dispose.
+- A single document-wide MutationObserver with requestAnimationFrame coalescing and
+  result caching keeps the sidebar-pane stamp at one small query per frame with zero
+  DOM writes during streaming.
 - The sidebar column is hooked via `data-pane="sidebar"`, stamped by the plugin's
   own idempotent shim — no web-ui-all dependency.
 
