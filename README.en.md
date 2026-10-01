@@ -19,7 +19,7 @@ the moment the turn settles — leaving only each turn's final answer.
 Spacing sliders (paragraph gap / tool-row gap) are **ratio-based**: one step
 scales every element family (paragraphs, lists, headings, tool rows,
 sub-call stacks) from its own stock spacing, so the whole reply tightens or
-loosens evenly.
+loosens evenly. A separate **reasoning-row gap** slider is additive (-8..+24px, 0 = the harness's own spacing) and controls the gap between each reasoning row and its neighbouring content.
 
 See [README.md](./README.md) for the full documentation (Chinese).
 
