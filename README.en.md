@@ -17,7 +17,7 @@ scales every element family (paragraphs, lists, headings, tool rows,
 sub-call stacks) from its own stock spacing, so the whole reply tightens or
 loosens evenly. A separate **reasoning-row gap** slider is additive (-8..+24px, 0 = the harness's own spacing) and controls the gap between each reasoning row and its neighbouring content.
 
-Stock metrics track the current harness build (body 14/24, headings 21/30 · 19/28 · 18/26 · 14/24, secondary 13px, reasoning 20px, code 11/16, bubble 14/22), so the defaults render exactly like a plugin-free install.
+Stock metrics are built ON the harness font system: sizes are offsets from `--dsh-content-font-size`, line boxes are ratios over `calc(24px + --dsh-content-font-delta)`, so changing the harness font size moves the plugin with it while the defaults resolve to the official ladder (body 14/24, headings 21/30 · 19/28 · 18/26 · 14/24, secondary 13, reasoning 20, code 11/16, bubble 14/22). Conversation rules are scoped to the chat flow (`[data-chat-flow]`) so they no longer reach sidebar terminals or other panels reusing the same class names, and tool rows grow instead of clipping when line height increases.
 
 See [README.md](./README.md) for the full documentation (Chinese).
 
